@@ -38,10 +38,11 @@ services:
             - --providers.docker.exposedByDefault=false
             - --entryPoints.http.address=:80
             - --entryPoints.https.address=:443
-            - --certificatesresolvers.letsEncrypt.acme.httpChallenge=true
-            - --certificatesresolvers.letsEncrypt.acme.httpChallenge.entryPoint=http
-            - --certificatesresolvers.letsEncrypt.acme.email=admin@azzorsoft.ru
-            - --certificatesresolvers.letsEncrypt.acme.storage=/certs/acme.json
+            - --certificatesresolvers.letsencrypt.acme.email=admin@azzorsoft.ru
+            - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
+            - --certificatesresolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+            - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
+            - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
         networks:
             - traefik-public
 
