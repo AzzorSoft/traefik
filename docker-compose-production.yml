@@ -1,6 +1,18 @@
 services:
     traefik:
         image: traefik:2.11.13
+        command:
+            --providers.docker=true
+            --providers.docker.watch=true
+            --providers.docker.swarmMode=true
+            --providers.docker.exposedByDefault=false
+            --entryPoints.http.address=:80
+            --entryPoints.https.address=:443
+            --certificatesresolvers.letsEncrypt.acme.httpChallenge=true
+            --certificatesresolvers.letsEncrypt.acme.httpChallenge.entryPoint=http
+            --certificatesresolvers.letsEncrypt.acme.email=mail@deworker.pro
+            --certificatesresolvers.letsEncrypt.acme.storage=/certs/acme.json
+            --certificatesresolvers.letsEncrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
         ports:
             - target: 80
               published: 80
@@ -10,9 +22,12 @@ services:
               published: 443
               protocol: tcp
               mode: host
+        networks:
+            - traefik-public
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - traefik-public-certs:/certs
         deploy:
-            placement:
-                constraints: [ node.role == manager ]
             labels:
                 - traefik.enable=true
                 - traefik.docker.network=traefik-public
@@ -28,23 +43,8 @@ services:
                 - traefik.http.middlewares.secure-headers.headers.sslRedirect=true
                 - traefik.http.middlewares.secure-headers.headers.stsSeconds=31536000
                 - traefik.http.middlewares.secure-headers.headers.contentSecurityPolicy=block-all-mixed-content
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock:ro
-            - traefik-public-certs:/certs
-        command:
-            - --providers.docker=true
-            - --providers.docker.watch=true
-            - --providers.docker.swarmMode=true
-            - --providers.docker.exposedByDefault=false
-            - --entryPoints.http.address=:80
-            - --entryPoints.https.address=:443
-            - --certificatesresolvers.letsencrypt.acme.email=admin@azzorsoft.ru
-            - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
-            - --certificatesresolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
-            - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
-            - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-        networks:
-            - traefik-public
+            placement:
+                constraints: [ node.role == manager ]
 
 volumes:
     traefik-public-certs:
